@@ -2,7 +2,6 @@ package html2json
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"strings"
 
@@ -14,6 +13,7 @@ type Dom struct {
 	Node *html.Node
 }
 
+//easyjson:json
 type Node struct {
 	Name       string            `json:"name,omitempty"`
 	Attributes map[string]string `json:"attributes,omitempty"`
@@ -156,18 +156,16 @@ func convertTypeHTML(s []*html.Node) []*Dom {
 	return q
 }
 
+//easyjson:json
+type nodeJson []Node
+
 func convertToJSON(nodes []*html.Node) ([]byte, error) {
-	rootJSONnodes := make([]Node, len(nodes))
+	rootJSONnodes := make(nodeJson, len(nodes))
 	for i, n := range nodes {
 		rootJSONnodes[i].populateFrom(n)
 	}
 
-	json, err := json.MarshalIndent(rootJSONnodes, "", "    ")
-	if err != nil {
-		return nil, err
-	}
-
-	return json, err
+	return rootJSONnodes.MarshalJSON()
 }
 
 func (n *Node) populateFrom(htmlNode *html.Node) (*Node, error) {
